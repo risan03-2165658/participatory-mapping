@@ -130,16 +130,18 @@
                 'data': geojson
             });
 
-            map.addLayer({
-                'id': 'placesLayer',
-                'type': 'circle',
-                'source': 'places',
-                'paint': {
-                    'circle-radius': 6,
-                    'circle-color': '#B42222'
-                }
-            });
+        map.addLayer({
+            'id': 'placesLayer',
+            'type': 'circle',
+            'source': 'places',
+            'paint': {
+                'circle-radius': 6,
+                'circle-color': '#FCCCF8', // Pink fill color
+                'circle-stroke-color': '#000080', // Dark blue outline color
+                'circle-stroke-width': 1.2 // Adjust the width of the outline as needed
+            }
         });
+    });
 
         // Show popup on mouse enter over an existing point
         map.on('mouseenter', 'placesLayer', function (e) {
