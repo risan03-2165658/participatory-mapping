@@ -7,7 +7,7 @@ const app = express();
 
 // Define CORS options
 let corsOptions = {
-    origin: ['https://localhost', 'https://www.github.io', 'https://risan03-2165658.github.io'],
+    origin: ['https://localhost', 'https://www.github.io', 'https://risa-participatory-mapping-85df1f3b3be9.github.io'],
     optionsSuccessStatus: 200
 }
 
