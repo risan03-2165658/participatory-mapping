@@ -1,11 +1,9 @@
 # Creating Your Own Participatory Mapping Project: A Guide
 
-Bo Zhao | Department of Geography |  University of Washington
+Risa Nabari | Geography:Data Science |  University of Washington
 
-***First release:*** June 17th, 2023 | ***Last Update:*** June 23th, 2023
+[`Link to my Web Map`](https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/)
 
-> **Cite this work:** Zhao, Bo, 2023, "Crafting Your Own Participatory Mapping Project: A Guide", https://doi.org/10.7910/DVN/VSND2H, *Harvard Dataverse*, V1
-> 
 
 Participatory mapping, also known as community-based mapping, is a general term that refers to the process of creating maps by, for, or with local communities. It allows local communities to represent their own perceptions, knowledge, and experiences about their environment. These maps can be used for a variety of purposes, such as natural resource management, land use planning, advocacy for land rights, counter-mapping, etc. Examples include [`Shifting LGBTQ+ Spaces`](https://hgis.uw.edu/lgbtqspaces), [`Archiving the CHOP`](https://hgis.uw.edu/chop/), and [`Queering the Map`](https://www.queeringthemap.com/).
 
