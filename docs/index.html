@@ -130,18 +130,16 @@
                 'type': 'geojson',
                 'data': geojson
             });
-
-            map.addLayer({
-                'id': 'placesLayer',
-                'type': 'circle',
-                'source': 'places',
-                'paint': {
-                    'circle-radius': 6,
-                    'circle-color': '#FCCCF8', // Pink fill color
-                    'circle-stroke-color': '#000080', // Dark blue outline color
-                    'circle-stroke-width': 1.2 // Adjust the width of the outline as needed
-                }
-            });
+        
+        map.addLayer({
+            'id': 'placesLayer',
+            'type': 'symbol',
+            'source': 'places',
+            'layout': {
+                'icon-image': 'img/heart', // Path to your heart icon image (without file extension)
+                'icon-size': 1.5, // Adjust the size of the icon as needed
+                'icon-allow-overlap': true // Allow overlapping icons
+            }
         });
 
         // Show popup on mouse enter over an existing point
