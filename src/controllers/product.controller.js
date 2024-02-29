@@ -30,7 +30,7 @@ exports.addRecord = async (req, res) => {
         let { contributor, content, location, lat, lng } = req.body;
         // let currTime = new Date().toISOString();
         console.log('INSERT INTO "tblRecord"(contributor, content, location, lat, lng) VALUES ($1, $2, $3, $4, $5)',
-            [contributor, content, lat, lng]);
+            [contributor, content, location, lat, lng]);
         await db.query(
             'INSERT INTO "tblRecord"(contributor, content, location, lat, lng) VALUES ($1, $2, $3, $4, $5)',
             [contributor, content, location, lat, lng]
