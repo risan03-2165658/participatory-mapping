@@ -34,6 +34,7 @@ exports.getRecord = async (req, res) => {
 };
 
 // Insert a new record
+// Insert a new record
 exports.addRecord = async (req, res) => {
     try {
         let { contributor, content, location, lat, lng } = req.body;
@@ -42,7 +43,8 @@ exports.addRecord = async (req, res) => {
         // Check if an image file was uploaded
         if (req.files && req.files.image) {
             // Handle file upload and get the file path
-            image = handleFileUpload(req.files.image);
+            const uploadedFile = req.files.image;
+            image = handleFileUpload(uploadedFile);
         }
 
         // Construct the SQL query with placeholders
@@ -66,4 +68,3 @@ exports.addRecord = async (req, res) => {
         });
     }
 };
-
