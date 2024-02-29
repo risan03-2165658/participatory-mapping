@@ -133,7 +133,7 @@
         
             // Add the custom heart icon image as a source to the map
             map.loadImage(
-                'https://icons8.com/icon/UvwcJMZZ1Xmg/heart', // Replace this URL with the URL of your heart icon image
+                'https://www.iconsdb.com/icons/preview/pink/heart-23-xxl.png', // Replace this URL with the URL of your heart icon image
                 function (error, image) {
                     if (error) throw error;
                     map.addImage('heart-icon', image); // Add the loaded image to the map as 'heart-icon'
@@ -145,7 +145,7 @@
                         'source': 'places',
                         'layout': {
                             'icon-image': 'heart-icon', // Use the ID of the loaded image
-                            'icon-size': 5, // Adjust the size of the icon as needed
+                            'icon-size': 2.5, // Adjust the size of the icon as needed
                             'icon-allow-overlap': true // Allow overlapping icons
                         }
                     });
