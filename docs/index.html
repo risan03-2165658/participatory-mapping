@@ -193,19 +193,70 @@
             e.preventDefault();
         });
 
-        // Function to handle the submission of a new record
-        async function submitNewRecord() {
-            let contributor = document.getElementById('name').value;
-            let place = document.getElementById('place').value; // Get the place/address value
-            let content = document.getElementById('content').value;
-            let lngLat = popup.getLngLat();
-            
-            // Validate input data here
+// Function to handle the submission of a new record
+async function submitNewRecord() {
+    let contributor = document.getElementById('name').value;
+    let place = document.getElementById('place').value; // Get the place/address value
+    let content = document.getElementById('content').value;
+    let lngLat = popup.getLngLat();
+    
+    // Validate input data here
+    if (!contributor || !place || !content || !lngLat) {
+        alert("Please fill in all the fields!");
+        return;
+    }
+
+    console.log("Adding record:", { contributor, place, content, lngLat });
+
+    try {
+        // Create an object with the data to be sent
+        let data = {
+            contributor: contributor,
+            place: place,
+            content: content,
+            lat: lngLat.lat,
+            lng: lngLat.lng
+        };
+
+        // Set the POST request settings
+        let settings = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        };
+
+        // Send the POST request to add the new record
+        let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/add-record', settings);
         
-            console.log("Adding record:", { contributor, place, content, lngLat });
-        
-            // Add your code to submit the data to the server
+        // Check if the request was successful
+        if (response.ok) {
+            // Remove the popup and update the GeoJSON data with the new point
+            popup.remove();
+            geojson.features.push({
+                'type': 'Feature',
+                'properties': {
+                    'contributor': contributor,
+                    'place': place,
+                    'content': content
+                },
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [lngLat.lng, lngLat.lat]
+                }
+            });
+            map.getSource('places').setData(geojson);
+            console.log("Record added successfully!");
+        } else {
+            console.error("Failed to add record:", response.statusText);
+            alert("Failed to add record. Please try again later.");
         }
+    } catch (error) {
+        console.error("Error occurred while adding record:", error);
+        alert("Error occurred while adding record. Please try again later.");
+    }
+}
 
     </script>
 
