@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title> Aesthetic Places in Seattle - Participatory Mapping Project</title>
+    <title>A Minimum Viable Participatory Mapping Project</title>
     <script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet" />
     <!-- Styles for the map and popup -->
@@ -40,7 +40,12 @@
             padding: 10px;
         }
 
-        #name,
+        #name {
+            width: 100%;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+
         #place {
             width: 100%;
             height: 20px;
@@ -52,7 +57,7 @@
             height: 45px;
             margin-bottom: 10px;
         }
-        
+
         #submit {
             float: right;
         }
@@ -65,19 +70,20 @@
     
     <!-- Information box -->
     <div id="info">
-        <h3> Participatory Mapping: Aesthetic Places in Seattle!!</h3>
-        <h4>Risa Nabari | University of Washington | February 28th, 2024 </h4>
+        <h3>A Minimum Viable Participatory Mapping Project</h3>
+        <h4>Bo Zhao | University of Washington </h4>
         <!-- Introduction to the participatory mapping solution -->
         <p>
-            This participatory map project allows users to discover aesthetic and fun places recommended by 
-            locals and the University of Washington (UW) community, displayed as pink dots on the map. 
-            Users can contribute their favorite spots, hidden gems, and personal recommendations, creating 
-            a dynamic and inclusive space for sharing and exploring the vibrant attractions of Seattle.
-        </p> 
-        <p>Explore this map and share your favorite places in Seattle<3</p>
-        <p>  An instruction of this participatory mapping can be found 
+            This map is a minimum viable solution to participatory mapping.
+            Users can contribute their local knowledge by clicking on the map,
+            submitting their information, and viewing it represented as a red dot.
+            Existing contributions can also be viewed as red dots. While this map only offers
+            basic functionality, it can be expanded or repurposed to build your own participatory mapping projects. To help you envision what this map can assist you, you can take a look at a few existing projects, such as <a href="https://hgis.uw.edu/lgbtqspaces/" target="_blank"><b>Shifting LGBTQ+ spaces</b></a>,
+            <a href="https://hgis.uw.edu/chop"> <b>Archiving the CHOP</b></a> and <a href="https://www.queeringthemap.com/" target="_blank"><b>Queering the Map</b></a>.
+            An instruction can be found 
             <a href="https://www.github.com/jakobzhao/participatory-mapping" target="_blank">here</a>.
-            <i>Last update: February 28, 2024</i></p>
+            <i>Last update: June 23, 2023</i>
+        </p> 
     </div>
     
     <!-- JavaScript code for the interactive map and data submission -->
@@ -94,7 +100,7 @@
         // Create a new map instance
         let map = new maplibregl.Map({
             container: 'map', // container id
-            style: 'https://api.maptiler.com/maps/winter-v2/style.json?key=1iUN5mjSSUj1joursjaJ', // style URL
+            style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Cusoe5zmfmn26glFoeoe', // style URL
             center: [-122.3321, 47.6062], // starting position [lng, lat]
             // pitch: 45, // pitch in degrees
             zoom: 12 // starting zoom
@@ -102,7 +108,7 @@
 
         // Fetch existing records when the window is loaded
         window.addEventListener("load", async function () {
-            let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/get-record', {
+            let response = await fetch('https://pmap-28a9a9408e2b.herokuapp.com/api/get-record', {
                 method: 'GET'
             });
 
@@ -114,7 +120,7 @@
                     'type': 'Feature',
                     'properties': {
                         'contributor': data.rows[i].contributor,
-                        'content': data.rows[i].content
+                        'content': data.rows[i].content,
                     },
                     'geometry': {
                         'type': 'Point',
@@ -137,9 +143,7 @@
                 'source': 'places',
                 'paint': {
                     'circle-radius': 6,
-                    'circle-color': '#FCCCF8', // Pink fill color
-                    'circle-stroke-color': '#000080', // Dark blue outline color
-                    'circle-stroke-width': 1.2 // Adjust the width of the outline as needed
+                    'circle-color': '#B42222'
                 }
             });
         });
@@ -154,9 +158,7 @@
 
             popup = new maplibregl.Popup()
                 .setLngLat(coordinates)
-                .setHTML(
-                    `<p><b>${contributor}</b> <i>said:</i> ${content}</p>`
-                )
+                .setHTML("<p><b>" + contributor + "</b> <i>said:</i> " + content + "</p>")
                 .addTo(map);
         });
 
@@ -173,14 +175,7 @@
             }
 
             // Create the HTML content for the contribution popup
-            const popupContent = `
-                <div id="popup">
-                    <input type="text" id="name" placeholder="Input your name here...">
-                    <input type="text" id="place" placeholder="Input your place/address here...">
-                    <input type="text" id="content" placeholder="Input your message here...">
-                    <button id="submit">Submit</button>
-                </div>
-            `;
+            const popupContent = '<div id="popup"><input type="text" id="name" placeholder="Input your name here..."><input type="text" id="place" placeholder="Input place here..."><input type="text" id="content" placeholder="Input your message here..."><button id="submit">submit</button></div>';
 
             // Create a new popup and set its content
             popup = new maplibregl.Popup({ closeOnClick: false })
@@ -193,73 +188,54 @@
             e.preventDefault();
         });
 
-// Function to handle the submission of a new record
-async function submitNewRecord() {
-    let contributor = document.getElementById('name').value;
-    let place = document.getElementById('place').value; // Get the place/address value
-    let content = document.getElementById('content').value;
-    let lngLat = popup.getLngLat();
-    
-    // Validate input data here
-    if (!contributor || !place || !content || !lngLat) {
-        alert("Please fill in all the fields!");
-        return;
-    }
+        // Function to handle the submission of a new record
+        async function submitNewRecord() {
+            let contributor = document.getElementById('name').value;
+            let place = document.getElementById('place').value; // Get the place/address value
+            let content = document.getElementById('content').value;
+            let lngLat = popup.getLngLat();
 
-    console.log("Adding record:", { contributor, place, content, lngLat });
+            // Create a new FormData object and append the data to it
+            let formData = new FormData();
+            formData.append('contributor', contributor);
+            formData.append('place', place); // Append the place/address to the FormData
+            formData.append('content', content);
+            formData.append('lng', lngLat.lng);
+            formData.append('lat', lngLat.lat);
 
-    try {
-        // Create an object with the data to be sent
-        let data = {
-            contributor: contributor,
-            place: place,
-            content: content,
-            lat: lngLat.lat,
-            lng: lngLat.lng
-        };
+            // Set the POST request settings
+            let settings = {
+                method: 'POST',
+                body: formData
+            };
 
-        // Set the POST request settings
-        let settings = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        };
-
-        // Send the POST request to add the new record
-        let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/add-record', settings);
-        
-        // Check if the request was successful
-        if (response.ok) {
-            // Remove the popup and update the GeoJSON data with the new point
-            popup.remove();
-            geojson.features.push({
-                'type': 'Feature',
-                'properties': {
-                    'contributor': contributor,
-                    'place': place,
-                    'content': content
-                },
-                'geometry': {
-                    'type': 'Point',
-                    'coordinates': [lngLat.lng, lngLat.lat]
-                }
-            });
-            map.getSource('places').setData(geojson);
-            console.log("Record added successfully!");
-        } else {
-            console.error("Failed to add record:", response.statusText);
-            alert("Failed to add record. Please try again later.");
+            try {
+                // Send the POST request to add the new record
+                await fetch('https://pmap-28a9a9408e2b.herokuapp.com/api/add-record', settings);
+            } catch (err) {
+                // Handle any errors that occur during the request
+                console.error(err);
+            } finally {
+                // Remove the popup and update the GeoJSON data with the new point
+                popup.remove();
+                geojson.features.push({
+                    'type': 'Feature',
+                    'properties': {
+                        'contributor': contributor,
+                        'place': place,
+                        'content': content,
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [lngLat.lng, lngLat.lat]
+                    }
+                });
+                map.getSource('places').setData(geojson);
+            }
         }
-    } catch (error) {
-        console.error("Error occurred while adding record:", error);
-        alert("Error occurred while adding record. Please try again later.");
-    }
-}
-
     </script>
 
 </body>
 
 </html>
+
