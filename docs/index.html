@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 
@@ -115,6 +114,7 @@
                     'type': 'Feature',
                     'properties': {
                         'contributor': data.rows[i].contributor,
+                        'location': data.rows[i].location
                         'content': data.rows[i].content,
                     },
                     'geometry': {
@@ -150,13 +150,14 @@
             map.getCanvas().style.cursor = 'pointer';
 
             var coordinates = e.features[0].geometry.coordinates;
+            var location = e.features[0].properties.location;
             var content = e.features[0].properties.content;
             var contributor = e.features[0].properties.contributor;
 
             popup = new maplibregl.Popup()
                 .setLngLat(coordinates)
                 .setHTML(
-                    `<p><b>${contributor}</b> <i>said:</i> ${content}</p>` 
+                    `<p><b>${contributor}</b> <i>said:</i> ${content}</p><p>Location: ${location}</p>` 
                 )
                 .addTo(map);
         });
@@ -243,6 +244,7 @@
 </body>
 
 </html>
+
 
 
 
