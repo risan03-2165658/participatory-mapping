@@ -41,7 +41,7 @@
         }
 
         #name,
-        #location {
+        #place {
             width: 100%;
             height: 20px;
             margin-bottom: 10px;
@@ -81,51 +81,50 @@
     </div>
     
     <!-- JavaScript code for the interactive map and data submission -->
-<!-- JavaScript code for the interactive map and data submission -->
-<script>
-    // Variable to hold the popup instance
-    let popup = null;
-    
-    // GeoJSON data object to store the contributed points
-    let geojson = {
-        'type': 'FeatureCollection',
-        'features': []
-    };
-
-    // Create a new map instance
-    let map = new maplibregl.Map({
-        container: 'map', // container id
-        style: 'https://api.maptiler.com/maps/winter-v2/style.json?key=1iUN5mjSSUj1joursjaJ', // style URL
-        center: [-122.3321, 47.6062], // starting position [lng, lat]
-        // pitch: 45, // pitch in degrees
-        zoom: 12 // starting zoom
-    });
-
-    // Fetch existing records when the window is loaded
-    window.addEventListener("load", async function () {
-        let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/get-record', {
-            method: 'GET'
+    <script>
+        // Variable to hold the popup instance
+        let popup = null;
+        
+        // GeoJSON data object to store the contributed points
+        let geojson = {
+            'type': 'FeatureCollection',
+            'features': []
+        };
+        
+        // Create a new map instance
+        let map = new maplibregl.Map({
+            container: 'map', // container id
+            style: 'https://api.maptiler.com/maps/winter-v2/style.json?key=1iUN5mjSSUj1joursjaJ', // style URL
+            center: [-122.3321, 47.6062], // starting position [lng, lat]
+            // pitch: 45, // pitch in degrees
+            zoom: 12 // starting zoom
         });
 
-        let data = await response.json();
-
-        // Iterate through the fetched records and add them to the GeoJSON data object
-        for (let i = 0; i < data.rows.length; i++) {
-            geojson.features.push({
-                'type': 'Feature',
-                'properties': {
-                    'contributor': data.rows[i].contributor,
-                    'location': data.rows[i].location,
-                    'content': data.rows[i].content,
-                },
-                'geometry': {
-                    'type': 'Point',
-                    'coordinates': [data.rows[i].lng, data.rows[i].lat]
-                }
+        // Fetch existing records when the window is loaded
+        window.addEventListener("load", async function () {
+            let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/get-record', {
+                method: 'GET'
             });
-        }
 
-        // After the data is fetched and processed, add the GeoJSON source and layer for existing points
+            let data = await response.json();
+      
+            // Iterate through the fetched records and add them to the GeoJSON data object
+            for (let i = 0; i < data.rows.length; i++) {
+                geojson.features.push({
+                    'type': 'Feature',
+                    'properties': {
+                        'contributor': data.rows[i].contributor,
+                        'content': data.rows[i].content
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [data.rows[i].lng, data.rows[i].lat]
+                    }
+                });
+            }
+        });
+
+        // After the map loads, add the GeoJSON source and layer for existing points
         map.on("load", function () {
             map.addSource('places', {
                 'type': 'geojson',
@@ -144,14 +143,71 @@
                 }
             });
         });
-    });
 
-    // Rest of your code for handling popups, user contributions, etc.
-</script>
+        // Show popup on mouse enter over an existing point
+        map.on('mouseenter', 'placesLayer', function (e) {
+            map.getCanvas().style.cursor = 'pointer';
+
+            var coordinates = e.features[0].geometry.coordinates;
+            var content = e.features[0].properties.content;
+            var contributor = e.features[0].properties.contributor;
+
+            popup = new maplibregl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(
+                    `<p><b>${contributor}</b> <i>said:</i> ${content}</p>`
+                )
+                .addTo(map);
+        });
+
+        // Remove popup on mouse leave from an existing point
+        map.on('mouseleave', 'placesLayer', function () {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+        // Handle click event on the map to allow user contribution
+        map.on('click', function (e) {
+            if (popup) {
+                popup.remove();
+            }
+
+            // Create the HTML content for the contribution popup
+            const popupContent = `
+                <div id="popup">
+                    <input type="text" id="name" placeholder="Input your name here...">
+                    <input type="text" id="place" placeholder="Input your place/address here...">
+                    <input type="text" id="content" placeholder="Input your message here...">
+                    <button id="submit">Submit</button>
+                </div>
+            `;
+
+            // Create a new popup and set its content
+            popup = new maplibregl.Popup({ closeOnClick: false })
+                .setLngLat(e.lngLat)
+                .setHTML(popupContent)
+                .addTo(map);
+
+            // Attach an event listener to the submit button to handle new record submission
+            document.getElementById('submit').addEventListener('click', submitNewRecord);
+            e.preventDefault();
+        });
+
+        // Function to handle the submission of a new record
+        async function submitNewRecord() {
+            let contributor = document.getElementById('name').value;
+            let place = document.getElementById('place').value; // Get the place/address value
+            let content = document.getElementById('content').value;
+            let lngLat = popup.getLngLat();
+            
+            // Validate input data here
+
+            console.log("Adding record:", { contributor, place, content, lngLat });
+
+            // Add your code to submit the data to the server
+        }
+    </script>
 
 </body>
 
 </html>
-
-
-
