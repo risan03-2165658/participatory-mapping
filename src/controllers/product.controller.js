@@ -36,16 +36,10 @@ exports.getRecord = async (req, res) => {
 // Insert a new record
 // Insert a new record
 // Insert a new record
+// Insert a new record
 exports.addRecord = async (req, res) => {
     try {
-        let { contributor, content, location, lat, lng } = req.body;
-        let image = null;
-
-        // Check if an image file was uploaded
-        if (req.files && req.files.image) {
-            // Handle file upload and get the file path
-            image = handleFileUpload(req.files.image);
-        }
+        let { contributor, content, location, lat, lng, image } = req.body;
 
         // Construct the SQL query with placeholders
         const sql = 'INSERT INTO "tblRecord" (contributor, content, lat, lng, location, image) VALUES ($1, $2, $3, $4, $5, $6)';
