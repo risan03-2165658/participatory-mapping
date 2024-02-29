@@ -68,22 +68,21 @@
     <!-- Map container -->
     <div id="map"></div>
     
-    <!-- Information box -->
+<!-- Information box -->
     <div id="info">
-        <h3>A Minimum Viable Participatory Mapping Project</h3>
-        <h4>Bo Zhao | University of Washington </h4>
+        <h3> Participatory Mapping: Aesthetic Places in Seattle!!</h3>
+        <h4>Risa Nabari | University of Washington | February 28th, 2024 </h4>
         <!-- Introduction to the participatory mapping solution -->
         <p>
-            This map is a minimum viable solution to participatory mapping.
-            Users can contribute their local knowledge by clicking on the map,
-            submitting their information, and viewing it represented as a red dot.
-            Existing contributions can also be viewed as red dots. While this map only offers
-            basic functionality, it can be expanded or repurposed to build your own participatory mapping projects. To help you envision what this map can assist you, you can take a look at a few existing projects, such as <a href="https://hgis.uw.edu/lgbtqspaces/" target="_blank"><b>Shifting LGBTQ+ spaces</b></a>,
-            <a href="https://hgis.uw.edu/chop"> <b>Archiving the CHOP</b></a> and <a href="https://www.queeringthemap.com/" target="_blank"><b>Queering the Map</b></a>.
-            An instruction can be found 
-            <a href="https://www.github.com/jakobzhao/participatory-mapping" target="_blank">here</a>.
-            <i>Last update: June 23, 2023</i>
+            This participatory map project allows users to discover aesthetic and fun places recommended by 
+            locals and the University of Washington (UW) community, displayed as pink dots on the map. 
+            Users can contribute their favorite spots, hidden gems, and personal recommendations, creating 
+            a dynamic and inclusive space for sharing and exploring the vibrant attractions of Seattle.
         </p> 
+        <p>Explore this map and share your favorite places in Seattle<3</p>
+        <p>  An instruction of this participatory mapping can be found 
+            <a href="https://www.github.com/jakobzhao/participatory-mapping" target="_blank">here</a>.
+            <i>Last update: February 28, 2024</i></p>
     </div>
     
     <!-- JavaScript code for the interactive map and data submission -->
@@ -100,15 +99,16 @@
         // Create a new map instance
         let map = new maplibregl.Map({
             container: 'map', // container id
-            style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=Cusoe5zmfmn26glFoeoe', // style URL
+            style: 'https://api.maptiler.com/maps/winter-v2/style.json?key=1iUN5mjSSUj1joursjaJ', // style URL
             center: [-122.3321, 47.6062], // starting position [lng, lat]
             // pitch: 45, // pitch in degrees
             zoom: 12 // starting zoom
         });
 
+
         // Fetch existing records when the window is loaded
         window.addEventListener("load", async function () {
-            let response = await fetch('https://pmap-28a9a9408e2b.herokuapp.com/api/get-record', {
+            let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/get-record', {
                 method: 'GET'
             });
 
@@ -211,7 +211,7 @@
 
             try {
                 // Send the POST request to add the new record
-                await fetch('https://pmap-28a9a9408e2b.herokuapp.com/api/add-record', settings);
+                await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/add-record', settings);
             } catch (err) {
                 // Handle any errors that occur during the request
                 console.error(err);
