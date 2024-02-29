@@ -1,13 +1,12 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Participatory Mapping Project</title>
-    <!-- MapLibre GL CSS -->
-    <link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet">
-    <!-- Custom CSS -->
+    <title> Aesthetic Places in Seattle - Participatory Mapping Project</title>
+    <script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <!-- Styles for the map and popup -->
     <style>
         /* Basic CSS for the page */
         body {
@@ -21,7 +20,7 @@
             bottom: 0;
             width: 100%;
         }
-
+        
         #info {
             position: absolute;
             top: 0;
@@ -37,7 +36,7 @@
             color: #000000;
             z-index: 1;
         }
-
+        
         #popup {
             padding: 10px;
         }
@@ -54,13 +53,7 @@
             height: 45px;
             margin-bottom: 10px;
         }
-
-        #image {
-            margin-bottom: 10px;
-            max-width: 100%;
-            max-height: 150px; /* Adjust the maximum height of the image */
-        }
-
+        
         #submit {
             float: right;
         }
@@ -70,82 +63,191 @@
 <body>
     <!-- Map container -->
     <div id="map"></div>
-
+    
     <!-- Information box -->
     <div id="info">
-        <h3>Participatory Mapping Project</h3>
+        <h3> Participatory Mapping: Aesthetic Places in Seattle!!</h3>
+        <h4>Risa Nabari | University of Washington | February 28th, 2024 </h4>
+        <!-- Introduction to the participatory mapping solution -->
         <p>
-            Welcome to the participatory mapping project! Explore the map and share your favorite places.
-        </p>
-        <p>
-            An instruction of this participatory mapping can be found
+            This participatory map project allows users to discover aesthetic and fun places recommended by 
+            locals and the University of Washington (UW) community, displayed as pink dots on the map. 
+            Users can contribute their favorite spots, hidden gems, and personal recommendations, creating 
+            a dynamic and inclusive space for sharing and exploring the vibrant attractions of Seattle.
+        </p> 
+        <p>Explore this map and share your favorite places in Seattle<3</p>
+        <p>  An instruction of this participatory mapping can be found 
             <a href="https://www.github.com/jakobzhao/participatory-mapping" target="_blank">here</a>.
-        </p>
+            <i>Last update: February 28, 2024</i></p>
     </div>
-
+    
     <!-- JavaScript code for the interactive map and data submission -->
-    <script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
     <script>
-        // Initialize the map
-        mapboxgl.accessToken = 'pk.eyJ1IjoicmlzYW4wMyIsImEiOiJjbHB2cGs4M2QwM2R2MmtwZGdrZ3VpOW9kIn0.Gt_hhmTyzCE7wV3Mes7tfQ'; // Replace with your Mapbox access token
-        var map = new maplibregl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11', // Example map style
-            center: [-74.5, 40], // Example center coordinates
-            zoom: 9 // Example zoom level
-        });
-
-        // Define the GeoJSON object
-        var geojson = {
+        // Variable to hold the popup instance
+        let popup = null;
+        
+        // GeoJSON data object to store the contributed points
+        let geojson = {
             'type': 'FeatureCollection',
             'features': []
         };
+        
+        // Create a new map instance
+        let map = new maplibregl.Map({
+            container: 'map', // container id
+            style: 'https://api.maptiler.com/maps/winter-v2/style.json?key=1iUN5mjSSUj1joursjaJ', // style URL
+            center: [-122.3321, 47.6062], // starting position [lng, lat]
+            // pitch: 45, // pitch in degrees
+            zoom: 12 // starting zoom
+        });
+
+        // Fetch existing records when the window is loaded
+        window.addEventListener("load", async function () {
+            let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/get-record', {
+                method: 'GET'
+            });
+
+            let data = await response.json();
+      
+            // Iterate through the fetched records and add them to the GeoJSON data object
+            for (let i = 0; i < data.rows.length; i++) {
+                geojson.features.push({
+                    'type': 'Feature',
+                    'properties': {
+                        'contributor': data.rows[i].contributor,
+                        'content': data.rows[i].content,
+                        'image': data.rows[i].image // Assuming image URLs are stored in the 'image' property
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [data.rows[i].lng, data.rows[i].lat]
+                    }
+                });
+            }
+        });
+
+        // After the map loads, add the GeoJSON source and layer for existing points
+        map.on("load", function () {
+            map.addSource('places', {
+                'type': 'geojson',
+                'data': geojson
+            });
+
+            map.addLayer({
+                'id': 'placesLayer',
+                'type': 'circle',
+                'source': 'places',
+                'paint': {
+                    'circle-radius': 6,
+                    'circle-color': '#FCCCF8', // Pink fill color
+                    'circle-stroke-color': '#000080', // Dark blue outline color
+                    'circle-stroke-width': 1.2 // Adjust the width of the outline as needed
+                }
+            });
+        });
+
+        // Show popup on mouse enter over an existing point
+        map.on('mouseenter', 'placesLayer', function (e) {
+            map.getCanvas().style.cursor = 'pointer';
+
+            var coordinates = e.features[0].geometry.coordinates;
+            var content = e.features[0].properties.content;
+            var contributor = e.features[0].properties.contributor;
+            var image = e.features[0].properties.image;
+
+            popup = new maplibregl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(
+                    `<p><b>${contributor}</b> <i>said:</i> ${content}</p>` +
+                    (image ? `<img src="${image}" alt="Contributor Image" id="image">` : '')
+                )
+                .addTo(map);
+        });
+
+        // Remove popup on mouse leave from an existing point
+        map.on('mouseleave', 'placesLayer', function () {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+        // Handle click event on the map to allow user contribution
+        map.on('click', function (e) {
+            if (popup) {
+                popup.remove();
+            }
+
+            // Create the HTML content for the contribution popup
+            const popupContent = `
+                <div id="popup">
+                    <input type="text" id="name" placeholder="Input your name here...">
+                    <input type="text" id="location" placeholder="Input your location/address here...">
+                    <input type="text" id="content" placeholder="Input your message here...">
+                    <input type="file" id="image" accept="image/*">
+                    <button id="submit">Submit</button>
+                </div>
+            `;
+
+            // Create a new popup and set its content
+            popup = new maplibregl.Popup({ closeOnClick: false })
+                .setLngLat(e.lngLat)
+                .setHTML(popupContent)
+                .addTo(map);
+
+            // Attach an event listener to the submit button to handle new record submission
+            document.getElementById('submit').addEventListener('click', submitNewRecord);
+            e.preventDefault();
+        });
 
         // Function to handle the submission of a new record
         async function submitNewRecord() {
             let contributor = document.getElementById('name').value;
             let location = document.getElementById('location').value; // Get the location/address value
             let content = document.getElementById('content').value;
-            let lngLat = map.getCenter(); // Get the map's center coordinates
-            let imageFile = document.getElementById('image').files[0]; // Get the uploaded image file
+            let lngLat = popup.getLngLat();
+            
+            // Create a new FormData object and append the data to it
+            let formData = new FormData();
+            formData.append('contributor', contributor);
+            formData.append('location', location); // Append the location/address to the FormData
+            formData.append('content', content);
+            formData.append('lng', lngLat.lng);
+            formData.append('lat', lngLat.lat);
+            
+            // Set the POST request settings
+            let settings = {
+                method: 'POST',
+                body: formData
+            };
 
             try {
-                // Convert image file to Base64 encoding
-                const reader = new FileReader();
-                reader.readAsDataURL(imageFile);
-                reader.onload = function () {
-                    const base64Image = reader.result;
-
-                    // Add record data to GeoJSON
-                    geojson.features.push({
-                        'type': 'Feature',
-                        'properties': {
-                            'contributor': contributor,
-                            'location': location,
-                            'content': content,
-                            'image': base64Image // Use the Base64 encoded image
-                        },
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': [lngLat.lng, lngLat.lat]
-                        }
-                    });
-
-                    // Update GeoJSON source
-                    map.getSource('places').setData(geojson);
-                };
+                // Send the POST request to add the new record
+                await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/add-record', settings);
             } catch (err) {
+                // Handle any errors that occur during the request
                 console.error(err);
             } finally {
-                // Remove the popup
+                // Remove the popup and update the GeoJSON data with the new point
                 popup.remove();
+                geojson.features.push({
+                    'type': 'Feature',
+                    'properties': {
+                        'contributor': contributor,
+                        'location': location,
+                        'content': content                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [lngLat.lng, lngLat.lat]
+                    }
+                });
+                map.getSource('places').setData(geojson);
             }
         }
     </script>
+
 </body>
 
 </html>
 
 
-</html>
+
 
