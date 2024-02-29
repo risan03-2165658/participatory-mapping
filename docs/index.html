@@ -116,7 +116,6 @@
                     'properties': {
                         'contributor': data.rows[i].contributor,
                         'content': data.rows[i].content,
-                        'image': data.rows[i].image // Assuming image URLs are stored in the 'image' property
                     },
                     'geometry': {
                         'type': 'Point',
@@ -153,13 +152,11 @@
             var coordinates = e.features[0].geometry.coordinates;
             var content = e.features[0].properties.content;
             var contributor = e.features[0].properties.contributor;
-            var image = e.features[0].properties.image;
 
             popup = new maplibregl.Popup()
                 .setLngLat(coordinates)
                 .setHTML(
-                    `<p><b>${contributor}</b> <i>said:</i> ${content}</p>` +
-                    (image ? `<img src="${image}" alt="Contributor Image" id="image">` : '')
+                    `<p><b>${contributor}</b> <i>said:</i> ${content}</p>` 
                 )
                 .addTo(map);
         });
