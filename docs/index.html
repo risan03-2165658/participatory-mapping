@@ -131,16 +131,28 @@
                 'data': geojson
             });
         
-        map.addLayer({
-            'id': 'placesLayer',
-            'type': 'symbol',
-            'source': 'places',
-            'layout': {
-                'icon-image': 'img/heart.jpg', // Path to your heart icon image (without file extension)
-                'icon-size': 1.5, // Adjust the size of the icon as needed
-                'icon-allow-overlap': true // Allow overlapping icons
-            }
+            // Add the custom heart icon image as a source to the map
+            map.loadImage(
+                'https://png.pngtree.com/png-vector/20201218/ourmid/pngtree-cartoon-pink-heart-for-valentine-isolated-vector-png-image_2578115.jpg', // Replace this URL with the URL of your heart icon image
+                function (error, image) {
+                    if (error) throw error;
+                    map.addImage('heart-icon', image); // Add the loaded image to the map as 'heart-icon'
+                    
+                    // Add the layer with the custom icon image
+                    map.addLayer({
+                        'id': 'placesLayer',
+                        'type': 'symbol',
+                        'source': 'places',
+                        'layout': {
+                            'icon-image': 'heart-icon', // Use the ID of the loaded image
+                            'icon-size': 1.5, // Adjust the size of the icon as needed
+                            'icon-allow-overlap': true // Allow overlapping icons
+                        }
+                    });
+                }
+            );
         });
+
 
         // Show popup on mouse enter over an existing point
         map.on('mouseenter', 'placesLayer', function (e) {
