@@ -51,13 +51,12 @@ exports.addRecord = async (req, res) => {
             image = handleFileUpload(req.files.image);
         }
 
-        console.log('INSERT INTO "tblRecord"(contributor, content, lat, lng, location, image) VALUES ($1, $2, $3, $4, $5, $6)',
-            [contributor, content, lat, lng, location, image]);
+        // Construct the SQL query with placeholders
+        const sql = 'INSERT INTO "tblRecord" (contributor, content, lat, lng, location, image) VALUES ($1, $2, $3, $4, $5, $6)';
+        const values = [contributor, content, lat, lng, location, image];
 
-        let { recordRows } = await db.query(
-            'INSERT INTO "tblRecord"(contributor, content, lat, lng, location, image) VALUES ($1, $2, $3, $4, $5, $6)',
-            [contributor, content, lat, lng, location, image]
-        );
+        // Execute the query with the correct parameters
+        const recordRows = await db.query(sql, values);
 
         res.status(200).send({
             message: "Record added into record table!",
@@ -73,4 +72,3 @@ exports.addRecord = async (req, res) => {
         });
     }
 };
-
