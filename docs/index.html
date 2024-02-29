@@ -120,6 +120,7 @@
                     'type': 'Feature',
                     'properties': {
                         'contributor': data.rows[i].contributor,
+                        'place': data.rows[i].place,
                         'content': data.rows[i].content,
                     },
                     'geometry': {
@@ -155,12 +156,13 @@
             map.getCanvas().style.cursor = 'pointer';
 
             var coordinates = e.features[0].geometry.coordinates;
+            var place = e.features[0].properties.place;
             var content = e.features[0].properties.content;
             var contributor = e.features[0].properties.contributor;
 
             popup = new maplibregl.Popup()
                 .setLngLat(coordinates)
-                .setHTML("<p><b>" + contributor + "</b> <i>said:</i> " + content + "</p>")
+                .setHTML("<p><b>" + contributor + "</b> at <i>" + place + "</i> said:</p><p>" + content + "</p>") // Include place/address in the popup
                 .addTo(map);
         });
 
