@@ -46,12 +46,6 @@
             margin-bottom: 10px;
         }
 
-        #place {
-            width: 100%;
-            height: 20px;
-            margin-bottom: 10px;
-        }
-
         #content {
             width: 100%;
             height: 45px;
@@ -68,21 +62,22 @@
     <!-- Map container -->
     <div id="map"></div>
     
-<!-- Information box -->
+    <!-- Information box -->
     <div id="info">
-        <h3> Participatory Mapping: Aesthetic Places in Seattle!!</h3>
-        <h4>Risa Nabari | University of Washington | February 28th, 2024 </h4>
+        <h3>A Minimum Viable Participatory Mapping Project</h3>
+        <h4>Bo Zhao | University of Washington </h4>
         <!-- Introduction to the participatory mapping solution -->
         <p>
-            This participatory map project allows users to discover aesthetic and fun places recommended by 
-            locals and the University of Washington (UW) community, displayed as pink dots on the map. 
-            Users can contribute their favorite spots, hidden gems, and personal recommendations, creating 
-            a dynamic and inclusive space for sharing and exploring the vibrant attractions of Seattle.
-        </p> 
-        <p>Explore this map and share your favorite places in Seattle<3</p>
-        <p>  An instruction of this participatory mapping can be found 
+            This map is a minimum viable solution to participatory mapping.
+            Users can contribute their local knowledge by clicking on the map,
+            submitting their information, and viewing it represented as a red dot.
+            Existing contributions can also be viewed as red dots. While this map only offers
+            basic functionality, it can be expanded or repurposed to build your own participatory mapping projects. To help you envision what this map can assist you, you can take a look at a few existing projects, such as <a href="https://hgis.uw.edu/lgbtqspaces/" target="_blank"><b>Shifting LGBTQ+ spaces</b></a>,
+            <a href="https://hgis.uw.edu/chop"> <b>Archiving the CHOP</b></a> and <a href="https://www.queeringthemap.com/" target="_blank"><b>Queering the Map</b></a>.
+            An instruction can be found 
             <a href="https://www.github.com/jakobzhao/participatory-mapping" target="_blank">here</a>.
-            <i>Last update: February 28, 2024</i></p>
+            <i>Last update: June 23, 2023</i>
+        </p> 
     </div>
     
     <!-- JavaScript code for the interactive map and data submission -->
@@ -105,7 +100,6 @@
             zoom: 12 // starting zoom
         });
 
-
         // Fetch existing records when the window is loaded
         window.addEventListener("load", async function () {
             let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/get-record', {
@@ -120,7 +114,6 @@
                     'type': 'Feature',
                     'properties': {
                         'contributor': data.rows[i].contributor,
-                        'place': data.rows[i].place,
                         'content': data.rows[i].content,
                     },
                     'geometry': {
@@ -144,9 +137,7 @@
                 'source': 'places',
                 'paint': {
                     'circle-radius': 6,
-                    'circle-color': '#FCCCF8', // Pink fill color
-                    'circle-stroke-color': '#000080', // Dark blue outline color
-                    'circle-stroke-width': 1.2 // Adjust the width of the outline as needed
+                    'circle-color': '#B42222'
                 }
             });
         });
@@ -156,13 +147,12 @@
             map.getCanvas().style.cursor = 'pointer';
 
             var coordinates = e.features[0].geometry.coordinates;
-            var place = e.features[0].properties.place;
             var content = e.features[0].properties.content;
             var contributor = e.features[0].properties.contributor;
 
             popup = new maplibregl.Popup()
                 .setLngLat(coordinates)
-                .setHTML("<p><b>" + contributor + "</b> at <i>" + place + "</i> said:</p><p>" + content + "</p>") // Include place/address in the popup
+                .setHTML("<p><b>" + contributor + "</b> <i>said:</i> " + content + "</p>")
                 .addTo(map);
         });
 
@@ -179,7 +169,7 @@
             }
 
             // Create the HTML content for the contribution popup
-            const popupContent = '<div id="popup"><input type="text" id="name" placeholder="Input your name here..."><input type="text" id="place" placeholder="Input place here..."><input type="text" id="content" placeholder="Input your message here..."><button id="submit">submit</button></div>';
+            const popupContent = '<div id="popup"><input type="text" id="name" placeholder="Input your name here..."><input type="text" id="content" placeholder="Input your message here..."><button id="submit">submit</button></div>';
 
             // Create a new popup and set its content
             popup = new maplibregl.Popup({ closeOnClick: false })
@@ -195,23 +185,21 @@
         // Function to handle the submission of a new record
         async function submitNewRecord() {
             let contributor = document.getElementById('name').value;
-            let place = document.getElementById('place').value; // Get the place/address value
             let content = document.getElementById('content').value;
             let lngLat = popup.getLngLat();
 
-            // Create a new FormData object and append the data to it
-            let formData = new FormData();
-            formData.append('contributor', contributor);
-            formData.append('place', place); // Append the place/address to the FormData
-            formData.append('content', content);
-            formData.append('lng', lngLat.lng);
-            formData.append('lat', lngLat.lat);
+            // Create a new URLSearchParams object and append the data to it
+            let newRecord = new URLSearchParams();
+            newRecord.append('contributor', contributor);
+            newRecord.append('content', content);
+            newRecord.append('lng', lngLat.lng);
+            newRecord.append('lat', lngLat.lat);
 
             // Set the POST request settings
             let settings = {
                 method: 'POST',
-                body: formData
-            };
+                body: newRecord
+            }
 
             try {
                 // Send the POST request to add the new record
@@ -226,7 +214,6 @@
                     'type': 'Feature',
                     'properties': {
                         'contributor': contributor,
-                        'place': place,
                         'content': content,
                     },
                     'geometry': {
@@ -242,4 +229,3 @@
 </body>
 
 </html>
-
