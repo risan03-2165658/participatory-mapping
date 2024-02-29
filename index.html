@@ -40,7 +40,8 @@
             padding: 10px;
         }
 
-        #name {
+        #name,
+        #location {
             width: 100%;
             height: 20px;
             margin-bottom: 10px;
@@ -52,6 +53,12 @@
             margin-bottom: 10px;
         }
 
+        #image {
+            margin-bottom: 10px;
+            max-width: 100%;
+            max-height: 150px; /* Adjust the maximum height of the image */
+        }
+        
         #submit {
             float: right;
         }
@@ -64,19 +71,19 @@
     
     <!-- Information box -->
     <div id="info">
-        <h3> Participatory Mapping Project</h3>
-        <h4>Risa Nabari | University of Washington | February 28th 2024 </h4>
+        <h3> Participatory Mapping: Aesthetic Places in Seattle!!</h3>
+        <h4>Risa Nabari | University of Washington | February 28th, 2024 </h4>
         <!-- Introduction to the participatory mapping solution -->
         <p>
-            This map is a minimum viable solution to participatory mapping.
-            Users can contribute their local knowledge by clicking on the map,
-            submitting their information, and viewing it represented as a red dot.
-            Users can also write message and add images to the location. 
-            <a href="https://hgis.uw.edu/chop"> <b>Archiving the CHOP</b></a> and <a href="https://www.queeringthemap.com/" target="_blank"><b>Queering the Map</b></a>.
-            An instruction can be found 
-            <a href="https://www.github.com/jakobzhao/participatory-mapping" target="_blank">here</a>.
-            <i>Last update: December 8, 2023</i>
+            This participatory map project allows users to discover aesthetic and fun places recommended by 
+            locals and the University of Washington (UW) community, displayed as pink dots on the map. 
+            Users can contribute their favorite spots, hidden gems, and personal recommendations, creating 
+            a dynamic and inclusive space for sharing and exploring the vibrant attractions of Seattle.
         </p> 
+        <p>Explore this map and share your favorite places in Seattle<3</p>
+        <p>  An instruction of this participatory mapping can be found 
+            <a href="https://www.github.com/jakobzhao/participatory-mapping" target="_blank">here</a>.
+            <i>Last update: February 28, 2024</i></p>
     </div>
     
     <!-- JavaScript code for the interactive map and data submission -->
@@ -114,6 +121,7 @@
                     'properties': {
                         'contributor': data.rows[i].contributor,
                         'content': data.rows[i].content,
+                        'image': data.rows[i].image // Assuming image URLs are stored in the 'image' property
                     },
                     'geometry': {
                         'type': 'Point',
@@ -130,18 +138,18 @@
                 'data': geojson
             });
 
-        map.addLayer({
-            'id': 'placesLayer',
-            'type': 'circle',
-            'source': 'places',
-            'paint': {
-                'circle-radius': 6,
-                'circle-color': '#FCCCF8', // Pink fill color
-                'circle-stroke-color': '#000080', // Dark blue outline color
-                'circle-stroke-width': 1.2 // Adjust the width of the outline as needed
-            }
+            map.addLayer({
+                'id': 'placesLayer',
+                'type': 'circle',
+                'source': 'places',
+                'paint': {
+                    'circle-radius': 6,
+                    'circle-color': '#FCCCF8', // Pink fill color
+                    'circle-stroke-color': '#000080', // Dark blue outline color
+                    'circle-stroke-width': 1.2 // Adjust the width of the outline as needed
+                }
+            });
         });
-    });
 
         // Show popup on mouse enter over an existing point
         map.on('mouseenter', 'placesLayer', function (e) {
@@ -150,10 +158,14 @@
             var coordinates = e.features[0].geometry.coordinates;
             var content = e.features[0].properties.content;
             var contributor = e.features[0].properties.contributor;
+            var image = e.features[0].properties.image;
 
             popup = new maplibregl.Popup()
                 .setLngLat(coordinates)
-                .setHTML("<p><b>" + contributor + "</b> <i>said:</i> " + content + "</p>")
+                .setHTML(
+                    `<p><b>${contributor}</b> <i>said:</i> ${content}</p>` +
+                    (image ? `<img src="${image}" alt="Contributor Image" id="image">` : '')
+                )
                 .addTo(map);
         });
 
@@ -170,7 +182,15 @@
             }
 
             // Create the HTML content for the contribution popup
-            const popupContent = '<div id="popup"><input type="text" id="name" placeholder="Input your name here..."><input type="text" id="content" placeholder="Input your message here..."><button id="submit">submit</button></div>';
+            const popupContent = `
+                <div id="popup">
+                    <input type="text" id="name" placeholder="Input your name here...">
+                    <input type="text" id="location" placeholder="Input your location/address here...">
+                    <input type="text" id="content" placeholder="Input your message here...">
+                    <input type="file" id="image" accept="image/*">
+                    <button id="submit">Submit</button>
+                </div>
+            `;
 
             // Create a new popup and set its content
             popup = new maplibregl.Popup({ closeOnClick: false })
@@ -186,21 +206,25 @@
         // Function to handle the submission of a new record
         async function submitNewRecord() {
             let contributor = document.getElementById('name').value;
+            let location = document.getElementById('location').value; // Get the location/address value
             let content = document.getElementById('content').value;
             let lngLat = popup.getLngLat();
+            let imageFile = document.getElementById('image').files[0]; // Get the uploaded image file
 
-            // Create a new URLSearchParams object and append the data to it
-            let newRecord = new URLSearchParams();
-            newRecord.append('contributor', contributor);
-            newRecord.append('content', content);
-            newRecord.append('lng', lngLat.lng);
-            newRecord.append('lat', lngLat.lat);
+            // Create a new FormData object and append the data to it
+            let formData = new FormData();
+            formData.append('contributor', contributor);
+            formData.append('location', location); // Append the location/address to the FormData
+            formData.append('content', content);
+            formData.append('lng', lngLat.lng);
+            formData.append('lat', lngLat.lat);
+            formData.append('image', imageFile); // Append the image file to the FormData
 
             // Set the POST request settings
             let settings = {
                 method: 'POST',
-                body: newRecord
-            }
+                body: formData
+            };
 
             try {
                 // Send the POST request to add the new record
@@ -215,7 +239,9 @@
                     'type': 'Feature',
                     'properties': {
                         'contributor': contributor,
+                        'location': location,
                         'content': content,
+                        'image': URL.createObjectURL(imageFile) // Assuming you want to display the uploaded image immediately
                     },
                     'geometry': {
                         'type': 'Point',
@@ -230,3 +256,4 @@
 </body>
 
 </html>
+
