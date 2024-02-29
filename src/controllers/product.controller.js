@@ -23,20 +23,20 @@ exports.getRecord = async (req, res) => {
  */
 exports.addRecord = async (req, res) => {
     try {
-        let { contributor, location, content, lat, lng } = req.body;
+        let { contributor, place, content, lat, lng } = req.body;
         
         // Validate input data here
 
-        console.log("Adding record:", { contributor, location, content, lat, lng });
+        console.log("Adding record:", { contributor, place, content, lat, lng });
 
         await db.query(
-            'INSERT INTO "tblRecord"(contributor, location, content, lat, lng) VALUES ($1, $2, $3, $4, $5)',
-            [contributor, location, content, lat, lng]
+            'INSERT INTO "tblRecord"(contributor, place, content, lat, lng) VALUES ($1, $2, $3, $4, $5)',
+            [contributor, place, content, lat, lng]
         );
 
         res.status(200).json({
             message: "Record added into record table!",
-            body: { contributor, location, content, lat, lng }
+            body: { contributor, place, content, lat, lng }
         });
     } catch (error) {
         console.error("Error adding record:", error);
