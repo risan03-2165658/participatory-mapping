@@ -1,6 +1,6 @@
 const db = require("../config/database");
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
 
 // Define the directory where uploaded images will be stored
 const uploadDir = path.join(__dirname, "../uploads");
