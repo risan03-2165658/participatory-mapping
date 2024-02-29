@@ -1,22 +1,4 @@
-const fs = require("fs");
-const path = require("path");
 const { db } = require("../config/database");
-
-// Define the directory where uploaded images will be stored
-const uploadDir = path.join(__dirname, "../uploads");
-
-// Create the directory if it doesn't exist
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
-
-// Function to handle file uploads
-const handleFileUpload = (file) => {
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = path.join(uploadDir, fileName);
-    file.mv(filePath); // Move the uploaded file to the designated directory
-    return filePath;
-};
 
 // Obtain all records
 exports.getRecord = async (req, res) => {
@@ -33,17 +15,17 @@ exports.getRecord = async (req, res) => {
     }
 };
 
-// Insert a new record
-// Insert a new record
-// Insert a new record
-// Insert a new record
+// Insert a new record with image encoded as Base64
 exports.addRecord = async (req, res) => {
     try {
         let { contributor, content, location, lat, lng, image } = req.body;
 
+        // Convert the image to Base64 encoding
+        const base64Image = Buffer.from(image.data, 'binary').toString('base64');
+
         // Construct the SQL query with placeholders
         const sql = 'INSERT INTO "tblRecord" (contributor, content, lat, lng, location, image) VALUES ($1, $2, $3, $4, $5, $6)';
-        const values = [contributor, content, lat, lng, location, image];
+        const values = [contributor, content, lat, lng, location, base64Image];
 
         // Execute the query with the correct parameters
         const recordRows = await db.query(sql, values);
@@ -51,7 +33,7 @@ exports.addRecord = async (req, res) => {
         res.status(200).send({
             message: "Record added into record table!",
             body: {
-                record: { contributor, content, lat, lng, location, image }
+                record: { contributor, content, lat, lng, location, image: base64Image }
             }
         });
     } catch (error) {
@@ -62,3 +44,4 @@ exports.addRecord = async (req, res) => {
         });
     }
 };
+
