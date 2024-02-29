@@ -1,12 +1,13 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title> Aesthetic Places in Seattle - Participatory Mapping Project</title>
-    <script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
-    <link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet" />
-    <!-- Styles for the map and popup -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participatory Mapping Project</title>
+    <!-- MapLibre GL CSS -->
+    <link href="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.css" rel="stylesheet">
+    <!-- Custom CSS -->
     <style>
         /* Basic CSS for the page */
         body {
@@ -20,7 +21,7 @@
             bottom: 0;
             width: 100%;
         }
-        
+
         #info {
             position: absolute;
             top: 0;
@@ -36,7 +37,7 @@
             color: #000000;
             z-index: 1;
         }
-        
+
         #popup {
             padding: 10px;
         }
@@ -59,7 +60,7 @@
             max-width: 100%;
             max-height: 150px; /* Adjust the maximum height of the image */
         }
-        
+
         #submit {
             float: right;
         }
@@ -69,41 +70,36 @@
 <body>
     <!-- Map container -->
     <div id="map"></div>
-    
+
     <!-- Information box -->
     <div id="info">
-        <h3> Participatory Mapping: Aesthetic Places in Seattle!!</h3>
-        <h4>Risa Nabari | University of Washington | February 28th, 2024 </h4>
-        <!-- Introduction to the participatory mapping solution -->
+        <h3>Participatory Mapping Project</h3>
         <p>
-            This participatory map project allows users to discover aesthetic and fun places recommended by 
-            locals and the University of Washington (UW) community, displayed as pink dots on the map. 
-            Users can contribute their favorite spots, hidden gems, and personal recommendations, creating 
-            a dynamic and inclusive space for sharing and exploring the vibrant attractions of Seattle.
-        </p> 
-        <p>Explore this map and share your favorite places in Seattle<3</p>
-        <p>  An instruction of this participatory mapping can be found 
+            Welcome to the participatory mapping project! Explore the map and share your favorite places.
+        </p>
+        <p>
+            An instruction of this participatory mapping can be found
             <a href="https://www.github.com/jakobzhao/participatory-mapping" target="_blank">here</a>.
-            <i>Last update: February 28, 2024</i></p>
+        </p>
     </div>
-    
+
     <!-- JavaScript code for the interactive map and data submission -->
+    <script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
     <script>
         // Variable to hold the popup instance
         let popup = null;
-        
+
         // GeoJSON data object to store the contributed points
         let geojson = {
             'type': 'FeatureCollection',
             'features': []
         };
-        
+
         // Create a new map instance
         let map = new maplibregl.Map({
             container: 'map', // container id
             style: 'https://api.maptiler.com/maps/winter-v2/style.json?key=1iUN5mjSSUj1joursjaJ', // style URL
             center: [-122.3321, 47.6062], // starting position [lng, lat]
-            // pitch: 45, // pitch in degrees
             zoom: 12 // starting zoom
         });
 
@@ -114,7 +110,7 @@
             });
 
             let data = await response.json();
-      
+
             // Iterate through the fetched records and add them to the GeoJSON data object
             for (let i = 0; i < data.rows.length; i++) {
                 geojson.features.push({
@@ -253,7 +249,7 @@
             }
         }
     </script>
-
 </body>
 
 </html>
+
