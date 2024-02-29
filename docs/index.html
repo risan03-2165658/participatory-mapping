@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -88,6 +89,9 @@
     
     <!-- JavaScript code for the interactive map and data submission -->
     <script>
+        // Variable to hold the popup instance
+        let popup = null;
+        
         // GeoJSON data object to store the contributed points
         let geojson = {
             'type': 'FeatureCollection',
@@ -99,57 +103,53 @@
             container: 'map', // container id
             style: 'https://api.maptiler.com/maps/winter-v2/style.json?key=1iUN5mjSSUj1joursjaJ', // style URL
             center: [-122.3321, 47.6062], // starting position [lng, lat]
+            // pitch: 45, // pitch in degrees
             zoom: 12 // starting zoom
         });
 
         // Fetch existing records when the window is loaded
         window.addEventListener("load", async function () {
-            try {
-                let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/get-record', {
-                    method: 'GET'
+            let response = await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/get-record', {
+                method: 'GET'
+            });
+
+            let data = await response.json();
+      
+            // Iterate through the fetched records and add them to the GeoJSON data object
+            for (let i = 0; i < data.rows.length; i++) {
+                geojson.features.push({
+                    'type': 'Feature',
+                    'properties': {
+                        'contributor': data.rows[i].contributor,
+                        'content': data.rows[i].content,
+                        'image': data.rows[i].image // Assuming image URLs are stored in the 'image' property
+                    },
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [data.rows[i].lng, data.rows[i].lat]
+                    }
                 });
-
-                let data = await response.json();
-        
-                // Iterate through the fetched records and add them to the GeoJSON data object
-                for (let i = 0; i < data.rows.length; i++) {
-                    let feature = {
-                        'type': 'Feature',
-                        'properties': {
-                            'contributor': data.rows[i].contributor,
-                            'content': data.rows[i].content,
-                            'image': data.rows[i].image // Assuming image URLs are stored in the 'image' property
-                        },
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': [data.rows[i].lng, data.rows[i].lat]
-                        }
-                    };
-                    geojson.features.push(feature);
-                }
-
-                // Add the GeoJSON source and layer for existing points
-                map.on("load", function () {
-                    map.addSource('places', {
-                        'type': 'geojson',
-                        'data': geojson
-                    });
-
-                    map.addLayer({
-                        'id': 'placesLayer',
-                        'type': 'circle',
-                        'source': 'places',
-                        'paint': {
-                            'circle-radius': 6,
-                            'circle-color': '#FCCCF8', // Pink fill color
-                            'circle-stroke-color': '#000080', // Dark blue outline color
-                            'circle-stroke-width': 1.2 // Adjust the width of the outline as needed
-                        }
-                    });
-                });
-            } catch (err) {
-                console.error("Error fetching existing records:", err);
             }
+        });
+
+        // After the map loads, add the GeoJSON source and layer for existing points
+        map.on("load", function () {
+            map.addSource('places', {
+                'type': 'geojson',
+                'data': geojson
+            });
+
+            map.addLayer({
+                'id': 'placesLayer',
+                'type': 'circle',
+                'source': 'places',
+                'paint': {
+                    'circle-radius': 6,
+                    'circle-color': '#FCCCF8', // Pink fill color
+                    'circle-stroke-color': '#000080', // Dark blue outline color
+                    'circle-stroke-width': 1.2 // Adjust the width of the outline as needed
+                }
+            });
         });
 
         // Show popup on mouse enter over an existing point
@@ -161,24 +161,27 @@
             var contributor = e.features[0].properties.contributor;
             var image = e.features[0].properties.image;
 
-            let popupContent = `<p><b>${contributor}</b> <i>said:</i> ${content}</p>`;
-            if (image) {
-                popupContent += `<img src="${image}" alt="Contributor Image" id="image">`;
-            }
-
-            new maplibregl.Popup()
+            popup = new maplibregl.Popup()
                 .setLngLat(coordinates)
-                .setHTML(popupContent)
+                .setHTML(
+                    `<p><b>${contributor}</b> <i>said:</i> ${content}</p>` +
+                    (image ? `<img src="${image}" alt="Contributor Image" id="image">` : '')
+                )
                 .addTo(map);
         });
 
         // Remove popup on mouse leave from an existing point
         map.on('mouseleave', 'placesLayer', function () {
             map.getCanvas().style.cursor = '';
+            popup.remove();
         });
 
         // Handle click event on the map to allow user contribution
         map.on('click', function (e) {
+            if (popup) {
+                popup.remove();
+            }
+
             // Create the HTML content for the contribution popup
             const popupContent = `
                 <div id="popup">
@@ -191,7 +194,7 @@
             `;
 
             // Create a new popup and set its content
-            new maplibregl.Popup({ closeOnClick: false })
+            popup = new maplibregl.Popup({ closeOnClick: false })
                 .setLngLat(e.lngLat)
                 .setHTML(popupContent)
                 .addTo(map);
@@ -204,53 +207,53 @@
         // Function to handle the submission of a new record
         async function submitNewRecord() {
             let contributor = document.getElementById('name').value;
-            let location = document.getElementById('location').value;
+            let location = document.getElementById('location').value; // Get the location/address value
             let content = document.getElementById('content').value;
-            let lngLat = map.getCenter();
-            let imageFile = document.getElementById('image').files[0];
+            let lngLat = popup.getLngLat();
+            let imageFile = document.getElementById('image').files[0]; // Get the uploaded image file
 
+            // Create a new FormData object and append the data to it
             let formData = new FormData();
             formData.append('contributor', contributor);
-            formData.append('location', location);
+            formData.append('location', location); // Append the location/address to the FormData
             formData.append('content', content);
             formData.append('lng', lngLat.lng);
             formData.append('lat', lngLat.lat);
-            formData.append('image', imageFile);
+            formData.append('image', imageFile); // Append the image file to the FormData
 
+            // Set the POST request settings
             let settings = {
                 method: 'POST',
                 body: formData
             };
 
             try {
+                // Send the POST request to add the new record
                 await fetch('https://risa-participatory-mapping-85df1f3b3be9.herokuapp.com/api/add-record', settings);
-                
-                // Add the new point to the map
-                let newFeature = {
+            } catch (err) {
+                // Handle any errors that occur during the request
+                console.error(err);
+            } finally {
+                // Remove the popup and update the GeoJSON data with the new point
+                popup.remove();
+                geojson.features.push({
                     'type': 'Feature',
                     'properties': {
                         'contributor': contributor,
                         'location': location,
                         'content': content,
-                        'image': URL.createObjectURL(imageFile)
+                        'image': URL.createObjectURL(imageFile) // Assuming you want to display the uploaded image immediately
                     },
                     'geometry': {
                         'type': 'Point',
                         'coordinates': [lngLat.lng, lngLat.lat]
                     }
-                };
-                geojson.features.push(newFeature);
+                });
                 map.getSource('places').setData(geojson);
-            } catch (err) {
-                console.error("Error submitting new record:", err);
             }
-
-            // Remove the popup after submission
-            map.closePopup();
         }
     </script>
 
 </body>
 
 </html>
-
