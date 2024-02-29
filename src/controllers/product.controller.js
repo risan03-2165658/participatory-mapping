@@ -1,6 +1,6 @@
-const db = require("../config/database");
 const fs = require("fs");
 const path = require("path");
+const { db } = require("../config/database");
 
 // Define the directory where uploaded images will be stored
 const uploadDir = path.join(__dirname, "../uploads");
@@ -18,9 +18,7 @@ const handleFileUpload = (file) => {
     return filePath;
 };
 
-// /**
-//  * getRecords: Obtains all records
-//  */
+// Obtain all records
 exports.getRecord = async (req, res) => {
     try {
         const response = await db.query('SELECT * FROM "tblRecord" ORDER BY id ASC');
@@ -35,11 +33,7 @@ exports.getRecord = async (req, res) => {
     }
 };
 
-// /**
-//  * Insert Comment/Review: Inserts user insert data of review into tblReview in the database
-//  * @param {form} req - form body that contains user selected information
-//  * @param {status} res - confirmation that comment has been added into the review table
-//  */
+// Insert a new record
 exports.addRecord = async (req, res) => {
     try {
         let { contributor, content, location, lat, lng } = req.body;
@@ -72,3 +66,4 @@ exports.addRecord = async (req, res) => {
         });
     }
 };
+
