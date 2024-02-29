@@ -27,14 +27,14 @@ exports.addRecord = async(req, res) => {
     console.log('INSERT INTO "tblRecord"(contributor, content, lat, lng) VALUES ($1, $2, $3, $4)',
         [contributor, content, lat, lng]);
     let {recordRows} = await db.query(
-        'INSERT INTO "tblRecord"(contributor, place, content, lat, lng) VALUES ($1, $2, $3, $4)',
+        'INSERT INTO "tblRecord"(contributor, content, lat, lng) VALUES ($1, $2, $3, $4)',
         [contributor, content, lat, lng]
     )
 
     res.status(200).send({
         message: "record added into record table!",
         body: {
-            record: {contributor,content, lat, lng}
+            record: {contributor, content, lat, lng}
         }
     })
 };
