@@ -85,32 +85,7 @@
 
     <!-- JavaScript code for the interactive map and data submission -->
     <script src="https://unpkg.com/maplibre-gl@3.1.0/dist/maplibre-gl.js"></script>
-    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.998.0.min.js"></script>
     <script>
-        // AWS Configuration
-        AWS.config.region = 'your-region'; // Specify your AWS region
-        AWS.config.credentials = new AWS.Credentials('your-access-key-id', 'your-secret-access-key'); // Specify your AWS access key ID and secret access key
-
-        // Create S3 instance
-        const s3 = new AWS.S3();
-
-        // Function to upload file to S3
-        function uploadFile(file) {
-            const params = {
-                Bucket: 'your-bucket-name', // Specify your S3 bucket name
-                Key: `${Date.now()}-${file.name}`, // Specify the file name in S3
-                Body: file,
-                ACL: 'public-read' // Set the file access control to public
-            };
-
-            return new Promise((resolve, reject) => {
-                s3.upload(params, (err, data) => {
-                    if (err) reject(err);
-                    else resolve(data.Location); // Return the file URL after successful upload
-                });
-            });
-        }
-
         // Function to handle the submission of a new record
         async function submitNewRecord() {
             let contributor = document.getElementById('name').value;
@@ -120,26 +95,30 @@
             let imageFile = document.getElementById('image').files[0]; // Get the uploaded image file
 
             try {
-                // Upload image file to S3
-                const imageUrl = await uploadFile(imageFile);
+                // Convert image file to Base64 encoding
+                const reader = new FileReader();
+                reader.readAsDataURL(imageFile);
+                reader.onload = function () {
+                    const base64Image = reader.result;
 
-                // Add record data to GeoJSON
-                geojson.features.push({
-                    'type': 'Feature',
-                    'properties': {
-                        'contributor': contributor,
-                        'location': location,
-                        'content': content,
-                        'image': imageUrl // Use the uploaded image URL from S3
-                    },
-                    'geometry': {
-                        'type': 'Point',
-                        'coordinates': [lngLat.lng, lngLat.lat]
-                    }
-                });
+                    // Add record data to GeoJSON
+                    geojson.features.push({
+                        'type': 'Feature',
+                        'properties': {
+                            'contributor': contributor,
+                            'location': location,
+                            'content': content,
+                            'image': base64Image // Use the Base64 encoded image
+                        },
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [lngLat.lng, lngLat.lat]
+                        }
+                    });
 
-                // Update GeoJSON source
-                map.getSource('places').setData(geojson);
+                    // Update GeoJSON source
+                    map.getSource('places').setData(geojson);
+                };
             } catch (err) {
                 console.error(err);
             } finally {
@@ -151,3 +130,4 @@
 </body>
 
 </html>
+
